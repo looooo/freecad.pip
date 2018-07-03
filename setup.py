@@ -1,7 +1,7 @@
 from setuptools import setup
-from freecad.pipintegration.__version__ import __version__
+from freecad.pipintegration import __version__
 
-setup(name='pip-integration',
+setup(name='pipintegration',
       version=str(__version__),
       packages=['freecad',
                 'freecad.pipintegration'],
