@@ -1,10 +1,10 @@
 from PySide import QtGui, QtCore
 import FreeCAD
+from freecad.pipintegration.app import pip
 
 
 class PipWidget(QtGui.QWidget):
     def __init__(self, parent=None):
-        from freecad.pipintegration import pip
         super(PipWidget, self).__init__(parent=parent)
         # list_widget with pip modules + install check
         self.setLayout(QtGui.QVBoxLayout())
