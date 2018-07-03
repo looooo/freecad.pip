@@ -5,12 +5,12 @@ To support pip installable freecad-packages we need to have a tool which allows 
 
 ## Install:
 
-`pip install https://github.com/looooo/pipintegration/archive/master.tar.gz`
+`pip install https://github.com/looooo/freecad_pipintegration/archive/master.tar.gz`
 
 ## Console Usage:
 
 ```
-from freecad.pipintegration import pip
+from freecad.pipintegration.app import pip
 pip.list()              # print a list of all installed packages
 pip.install(pkg_name)   # installs the package with pkg_name (if in freecad_modules.json)
 pip.uninstall(pkg_name) # uninstall the package.
@@ -19,9 +19,9 @@ pip.uninstall(pkg_name) # uninstall the package.
 ## Gui
 
 ```
-from freecad.pipintegration import widget
-w = widget.PipWidget()
-w.show()
+from freecad.pipintegration.gui import PipWidget
+widget = PipWidget()
+widget.show()
 ```
 
 ![pip_gui_tool](docs/pip_gui_tool.png)
