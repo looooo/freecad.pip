@@ -25,16 +25,16 @@ def popenAndCall(onExit, *popenArgs):
 
     thread = threading.Thread(target=runInThread, args=(onExit, popenArgs))
     thread.start()
-    return thread # returns immediately after the thread starts
+    return thread  # returns immediately after the thread starts
 
 
 class _pip(object):
     def __init__(self):
         # we should get the file from github!
         # for testing it is included in this repo
-        with open(os.path.join(__dir__, "freecad_modules.json"), "r") as modules_file:
+        pkgs_file = os.path.join(__dir__, "freecad_modules.json")
+        with open(pkgs_file, "r") as modules_file:
             data = json.load(modules_file)
-
         self.pkg_dict = {name: [source] for name, source in data.items()}
         self.update()
 
@@ -61,7 +61,8 @@ class _pip(object):
             FreeCAD.Console.PrintMessage(
                 "pip install {}\n".format(self.pkg_dict[pkg_name][0]))
             self._command(["pip", "install", "-U",
-                           self.pkg_dict[pkg_name][0]], call_back=call_back)
+                           self.pkg_dict[pkg_name][0], "--no-deps"],
+                          call_back=call_back)
 
     def uninstall(self, pkg_name, call_back=None):
         if self._check_pkg:
@@ -100,6 +101,39 @@ class _pip(object):
             if self._check_pkg(module_name):
                 installed_pkgs.append(module_name)
         return installed_pkgs
+
+    def check_dependencies(self, pkg_name):
+        import importlib
+        proc = subp.Popen(["pip", "show", pkg_name],
+                          stdout=subp.PIPE, stderr=subp.PIPE)
+        out, err = proc.communicate()
+        if not out:
+            FreeCAD.Console.PrintError(
+                "no package {} found\n".format(pkg_name))
+            return
+        out = out.decode("UTF-8").split("\n")
+        for line in out:
+            if line.startswith("Requires:"):
+                break
+        else:
+            return
+        line = line.strip("Requires:")
+        line = line.strip()
+        # filter(None, ...) removes empty items
+        deps = filter(None, line.split(", "))
+        missing_deps = []
+
+        for dep in deps:
+            try:
+                importlib.import_module(dep)
+            except ImportError:
+                missing_deps.append(dep)
+                FreeCAD.Console.PrintWarning(
+                    "Dependency {} is not installed\n".format(dep))
+            else:
+                FreeCAD.Console.PrintMessage(
+                    "Dependency {} is installed\n".format(dep))
+        return missing_deps
 
 
 pip = _pip()

@@ -1,6 +1,6 @@
 from PySide import QtGui, QtCore
 import FreeCAD
-from freecad.pipintegration.app import pip
+from freecad.pip.app import pip
 
 
 class PipWidget(QtGui.QWidget):
@@ -15,15 +15,18 @@ class PipWidget(QtGui.QWidget):
         self.update_pkg_list()
 
         self.install_button = QtGui.QPushButton("install")
+        self.check_deps_button = QtGui.QPushButton("check dependencies")
         self.uninstall_button = QtGui.QPushButton("uninstall")
         self.button_widget = QtGui.QWidget(self)
         self.button_widget.setLayout(QtGui.QHBoxLayout())
         self.button_widget.layout().addWidget(self.install_button)
+        self.button_widget.layout().addWidget(self.check_deps_button)
         self.button_widget.layout().addWidget(self.uninstall_button)
         self.layout().addWidget(self.button_widget)
 
         self.install_button.clicked.connect(self.install)
         self.uninstall_button.clicked.connect(self.uninstall)
+        self.check_deps_button.clicked.connect(self.check_dependencies)
         self.Qpip_list.currentItemChanged.connect(self.item_changed)
 
     def current_pkg_name(self):
@@ -37,6 +40,12 @@ class PipWidget(QtGui.QWidget):
 
     def uninstall(self, *args):
         self.pip.uninstall(self.current_pkg_name(), call_back=self.end_command)
+
+    def check_dependencies(self, *args):
+        missing_deps = self.pip.check_dependencies(self.current_pkg_name())
+        if missing_deps:
+            # show dialog with names of missing deps
+            pass
 
     def end_command(self, out, err):
         if err:
@@ -62,6 +71,8 @@ class PipWidget(QtGui.QWidget):
             if installed:
                 self.install_button.setEnabled(False)
                 self.uninstall_button.setEnabled(True)
+                self.check_deps_button.setEnabled(True)
             else:
                 self.install_button.setEnabled(True)
                 self.uninstall_button.setEnabled(False)
+                self.check_deps_button.setEnabled(True)
