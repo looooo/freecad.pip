@@ -1,9 +1,17 @@
-import pip
-import pip._internal as pipintern
-import json
 import os
 import copy
 import tempfile
+import subprocess as subp
+
+print_msg = print
+print_err = print
+
+def process(*args):
+    proc = subp.Popen(args, stdout=subp.PIPE, stderr=subp.PIPE)
+    out, err = proc.communicate()
+    if err:
+        raise RuntimeError(err.decode("utf8"))
+    return out.decode("utf8")
 
 class _pip(object):
     def __init__(self):
@@ -16,52 +24,51 @@ class _pip(object):
         """
         return "-c{}".format(self.constraint_file)
 
+    @staticmethod
+    def _convert_pkgs_list(text):
+        if text:
+            return [i.split()[:2] for i in text.split("\n")[2:-1]]
+        else:
+            return []
+
     def install(self, pkg_name):
-        return pipintern.main(["install", pkg_name, "--user", self._c_option()])
+        print_msg(process("pip", "install", pkg_name, "--user", self._c_option()))
+    
+    def install_develop(self, fp):
+        print_msg(process("pip", "install", "-e", fp, "--user", self._c_option()))
 
     def uninstall(self, pkg_name):
-        if pkg_name in [i[0] for i in self.list_user()]:
-            return pipintern.main(["uninstall", pkg_name, "-y"])
+        if pkg_name not in [i[0] for i in self.list_user()]:
+            print_err("pkg is not a user-package")
         else:
-            print("pkg is not a user-package")
-
-    def _list(self):
-        packages = pipintern.get_installed_distributions()
-        user_packages = pipintern.get_installed_distributions(user_only=True)
-        editable_packages = pipintern.get_installed_distributions(editables_only=True)
-        system_packages = [pkg for pkg in packages if pkg not in user_packages + editable_packages]
-        return packages, system_packages, user_packages, editable_packages
-    
-    @staticmethod
-    def _convert_pkgs_list(pkg_list):
-        output = []
-        for pkg in pkg_list:
-            output.append([pkg.project_name, pkg.version])
-        return output
+            print_msg(process("pip", "uninstall", pkg_name, "-y"))
     
     def list(self):
         """
         lists all packages
         """
-        packages = pipintern.get_installed_distributions()
+        packages = process("pip", "list")
         return self._convert_pkgs_list(packages)
     
     def list_user(self):
-        packages = pipintern.get_installed_distributions(user_only=True)
+        """
+        lists all user packages
+        """
+        packages = process("pip", "list", "--user")
         return self._convert_pkgs_list(packages)
 
     def list_editable(self):
-        packages = pipintern.get_installed_distributions(editables_only=True)
+        """
+        lists all packages
+        """
+        packages = process("pip", "list", "--editable")
         return self._convert_pkgs_list(packages)
     
     def list_system(self):
-        return [pkg for pkg in self.list() if not pkg in self.list_editable() + self.list_user()]
-
-    def update(self):
-        """
-        update all user packages
-        """
-        pass
+        editable = self.list_editable()
+        user = self.list_user()
+        non_system = editable + user
+        return [pkg for pkg in self.list() if not pkg in non_system]
 
     def freeze(self):
         """
@@ -79,7 +86,7 @@ class _pip(object):
 
     def select_user_install_dir(self, install_dir):
         """
-        Advanced option to set the user install dir. This allows to use different directories
+        Advanced option to sets the user install dir. This allows to use different directories
         for 3rd-party packages. This can be useful if different addons need different
         dependency-versions. This will require a restart of FreeCAD, because sys.path has to be 
         recomputed.
@@ -87,3 +94,4 @@ class _pip(object):
         os.env["PYTHONUSERBASE"] = install_dir
 
 pip = _pip()
+
