@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(__file__))
 from freecad.pip import __version__
 sys.path.pop(-1)
 
-setup(name='freecad_pip',
+setup(name='freecad.pip',
       version=__version__,
       packages=['freecad',
                 'freecad.pip'],
