@@ -2,12 +2,19 @@ import os
 import copy
 import tempfile
 import subprocess as subp
+import FreeCAD
 
-print_msg = print
-print_err = print
+print_msg = FreeCAD.Console.PrintMessage
+print_err = FreeCAD.Console.PrintError
 
-def process(*args):
-    proc = subp.Popen(args, stdout=subp.PIPE, stderr=subp.PIPE)
+def process(*args, silent=True):
+    if not silent:
+        command = ""
+        for i in args:
+            command += i + " "
+        print_msg(command)
+        print_msg("\n")
+    proc = subp.Popen(args, shell=True, stdout=subp.PIPE, stderr=subp.PIPE)
     out, err = proc.communicate()
     if err:
         raise RuntimeError(err.decode("utf8"))
@@ -32,16 +39,15 @@ class _pip(object):
             return []
 
     def install(self, pkg_name):
-        print_msg(process("pip", "install", pkg_name, "--user", self._c_option()))
+        print_msg(process("pip", "install", pkg_name, "--user", self._c_option(), silent=False))
     
     def install_develop(self, fp):
-        print_msg(process("pip", "install", "-e", fp, "--user", self._c_option()))
+        print_msg(process("pip", "install", "-e", fp, "--user", self._c_option(), silent=False))
 
     def uninstall(self, pkg_name):
-        if pkg_name not in [i[0] for i in self.list_user()]:
-            print_err("pkg is not a user-package")
-        else:
-            print_msg(process("pip", "uninstall", pkg_name, "-y"))
+        assert(pkg_name in [i[0] for i in self.list_user() + self.list_editable()])
+        print_msg(process("pip", "uninstall", pkg_name, "-y", silent=False))
+        print_msg("\n")
     
     def list(self):
         """
