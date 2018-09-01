@@ -1,4 +1,5 @@
 import os
+import platform
 import copy
 import tempfile
 import subprocess as subp
@@ -14,7 +15,10 @@ def process(*args, silent=True):
             command += i + " "
         print_msg(command)
         print_msg("\n")
-    proc = subp.Popen(args, shell=True, stdout=subp.PIPE, stderr=subp.PIPE)
+    shell = False
+    if platform.system == "Windows":
+        shell = True
+    proc = subp.Popen(args, shell=shell, stdout=subp.PIPE, stderr=subp.PIPE)
     out, err = proc.communicate()
     if err:
         raise RuntimeError(err.decode("utf8"))
