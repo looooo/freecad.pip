@@ -5,14 +5,14 @@ To support pip installable freecad-packages we need to have a tool which allows 
 
 ## Install with pip directly:
 
-`pip install https://github.com/looooo/freecad_pipintegration/archive/constraints.tar.gz`
+`pip install https://github.com/looooo/freecad_pipintegration/archive/master.tar.gz`
 
 ## Install with pip from python command line (eg. from the FreeCAD-python-console)
 
 ```python
 import subprocess as subp
 import FreeCAD
-url = "https://github.com/looooo/freecad_pipintegration/archive/constraints.tar.gz"
+url = "https://github.com/looooo/freecad_pipintegration/archive/master.tar.gz"
 proc = subp.Popen(["pip", "install", url, "--user"], stdout=subp.PIPE, stderr=subp.PIPE)
 out, err = proc.communicate()
 FreeCAD.Console.PrintMessage(out.decode("utf8"))
