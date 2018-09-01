@@ -13,7 +13,6 @@ class PipWidget(QtGui.QTabWidget):
 class PackageWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         super(PackageWidget, self).__init__(parent=parent)
-        # list_widget with pip modules + install check
         self.setLayout(QtGui.QVBoxLayout())
         self.Qpip_list = QtGui.QListWidget(self)
         self.layout().addWidget(self.Qpip_list)
@@ -66,12 +65,24 @@ class PackageUserWidget(PackageWidget):
         return pip.list_user()
 
     def install(self):
-        self.dialog = InstallDialog(callback=self.update_pkg_list)
-        self.dialog.show()
+        name, ok = QtGui.QInputDialog.getText(self,
+            "install package", "package name")
+        if ok and name:
+            pip.install(name)
+            self.update_pkg_list()
 
     def uninstall(self):
-        self.dialog = UninstallDialog(self.current_item_name, callback=self.update_pkg_list)
-        self.dialog.show()
+        ok_button = QtGui.QMessageBox.Ok
+        button_pressed = QtGui.QMessageBox.question(
+            self,
+            "uninstall user package",
+            "Uninstalling package '{}'?".format(self.current_item_name),
+            QtGui.QMessageBox.Cancel|ok_button
+            )
+        if button_pressed == ok_button:
+            pip.uninstall(self.current_item_name)
+            self.update_pkg_list()
+
 
 class PackageDevelopWidget(PackageWidget):
     def __init__(self, parent):
@@ -83,12 +94,22 @@ class PackageDevelopWidget(PackageWidget):
         return pip.list_editable()
 
     def install(self):
-        self.dialog = InstallDevelopDialog(callback=self.update_pkg_list)
-        self.dialog.show()
+        path = QtGui.QFileDialog.getExistingDirectory(self, "select package directory", QtCore.QDir.currentPath())
+        if path:
+            pip.install_develop(path)
+            self.update_pkg_list()
 
     def uninstall(self):
-        self.dialog = UninstallDialog(self.current_item_name, callback=self.update_pkg_list)
-        self.dialog.show()
+        ok_button = QtGui.QMessageBox.Ok
+        button_pressed = QtGui.QMessageBox.question(
+            self,
+            "uninstall development package",
+            "Uninstalling package '{}'?".format(self.current_item_name),
+            QtGui.QMessageBox.Cancel|ok_button
+            )
+        if button_pressed == ok_button:
+            pip.uninstall(self.current_item_name)
+            self.update_pkg_list()
 
 
 class PipDialog(QtGui.QDialog):
@@ -111,34 +132,3 @@ class PipDialog(QtGui.QDialog):
     def accept(self):
         self.callback()
         super(PipDialog, self).accept()
-
-class InstallDialog(PipDialog):
-    # TODO: must be file-path dialog!!!
-    def __init__(self, parent=None, callback=None):
-        super(InstallDialog, self).__init__(parent=parent, callback=callback)
-        self.package_name.setPlaceholderText("enter name of package")
-
-    def accept(self):
-        pip.install(self.package_name.text())
-        super(InstallDialog, self).accept()
-
-
-class InstallDevelopDialog(PipDialog):
-    def __init__(self, parent=None, callback=None):
-        super(InstallDevelopDialog, self).__init__(parent=parent, callback=callback)
-        self.package_name.setPlaceholderText("enter path to package")
-
-    def accept(self):
-        pip.install_develop(self.package_name.text())
-        super(InstallDialog, self).accept()
-
-
-class UninstallDialog(PipDialog):
-    def __init__(self, package_name, parent=None, callback=None):
-        super(UninstallDialog, self).__init__(parent=parent, callback=callback)
-        self.package_name.setText(package_name)
-        self.package_name.setEnabled(False)
-
-    def accept(self):
-        pip.uninstall(self.package_name.text())
-        super(UninstallDialog, self).accept()
