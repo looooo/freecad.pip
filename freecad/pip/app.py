@@ -55,29 +55,38 @@ class _pip(object):
     
     def list(self):
         """
-        lists all packages
+        pip list
         """
         packages = process("pip", "list")
+        return self._convert_pkgs_list(packages)
+
+    def list_user_and_editable(self):
+        """
+        pip list --user
+        """
+        packages = process("pip", "list", "--user")
         return self._convert_pkgs_list(packages)
     
     def list_user(self):
         """
-        lists all user packages
+        pip list --user (without pip list --editable)
         """
-        packages = process("pip", "list", "--user")
-        return self._convert_pkgs_list(packages)
+        user_and_editable = self.list_user_and_editable()
+        editable = self.list_editable()
+        return [pkg for pkg in user_and_editable if not pkg in editable]
 
     def list_editable(self):
         """
-        lists all packages
+        pip list --editable
         """
         packages = process("pip", "list", "--editable")
         return self._convert_pkgs_list(packages)
     
     def list_system(self):
-        editable = self.list_editable()
-        user = self.list_user()
-        non_system = editable + user
+        """
+        list all packages but --user and --editable
+        """
+        non_system = self.list_user_and_editable()
         return [pkg for pkg in self.list() if not pkg in non_system]
 
     def freeze(self):
