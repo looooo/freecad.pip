@@ -16,7 +16,7 @@ def process(*args, silent=True):
         print_msg(command)
         print_msg("\n")
     shell = False
-    if platform.system == "Windows":
+    if platform.system() == "Windows":
         shell = True
     proc = subp.Popen(args, shell=shell, stdout=subp.PIPE, stderr=subp.PIPE)
     out, err = proc.communicate()
@@ -44,7 +44,7 @@ class _pip(object):
 
     def install(self, pkg_name):
         print_msg(process("pip", "install", pkg_name, "--user", self._c_option(), silent=False))
-    
+
     def install_develop(self, fp):
         print_msg(process("pip", "install", "-e", fp, "--user", self._c_option(), silent=False))
 
@@ -52,7 +52,7 @@ class _pip(object):
         assert(pkg_name in [i[0] for i in self.list_user() + self.list_editable()])
         print_msg(process("pip", "uninstall", pkg_name, "-y", silent=False))
         print_msg("\n")
-    
+
     def list(self):
         """
         pip list
@@ -66,7 +66,7 @@ class _pip(object):
         """
         packages = process("pip", "list", "--user")
         return self._convert_pkgs_list(packages)
-    
+
     def list_user(self):
         """
         pip list --user (without pip list --editable)
@@ -81,7 +81,7 @@ class _pip(object):
         """
         packages = process("pip", "list", "--editable")
         return self._convert_pkgs_list(packages)
-    
+
     def list_system(self):
         """
         list all packages but --user and --editable
@@ -95,7 +95,7 @@ class _pip(object):
         """
         with open(self.constraint_file, "w") as fp:
             for pkg_name, version in self.list_system():
-                fp.write("{}=={}\n".format(pkg_name, version))         
+                fp.write("{}=={}\n".format(pkg_name, version))
 
     def set_fixed(self, pkg_name, fixed=True):
         """
@@ -107,10 +107,9 @@ class _pip(object):
         """
         Advanced option to sets the user install dir. This allows to use different directories
         for 3rd-party packages. This can be useful if different addons need different
-        dependency-versions. This will require a restart of FreeCAD, because sys.path has to be 
+        dependency-versions. This will require a restart of FreeCAD, because sys.path has to be
         recomputed.
         """
         os.env["PYTHONUSERBASE"] = install_dir
 
 pip = _pip()
-
