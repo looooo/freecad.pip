@@ -5,7 +5,7 @@ import FreeCADGui as Gui
 
 
 __dir__ = os.path.dirname(os.path.realpath(__file__))
-icon = QtGui.QIcon(os.path.join(__dir__, "PipTools.svg"))
+icon = QtGui.QIcon(os.path.join(__dir__, "PipTool.svg"))
 
 mw = Gui.getMainWindow()
 
