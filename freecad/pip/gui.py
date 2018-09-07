@@ -3,12 +3,15 @@ import FreeCAD
 from freecad.pip.app import pip
 
 
-class PipWidget(QtGui.QTabWidget):
+class PipWidget(QtGui.QDialog):
     def __init__(self, parent=None):
         super(PipWidget, self).__init__(parent=parent)
-        self.addTab(PackageSystemWidget(self), "system")
-        self.addTab(PackageUserWidget(self), "user")
-        self.addTab(PackageDevelopWidget(self), "develop")
+        self.setLayout(QtGui.QHBoxLayout())
+        self.tab_widget = QtGui.QTabWidget(self)
+        self.layout().addWidget(self.tab_widget)
+        self.tab_widget.addTab(PackageSystemWidget(self), "system")
+        self.tab_widget.addTab(PackageUserWidget(self), "user")
+        self.tab_widget.addTab(PackageDevelopWidget(self), "develop")
 
 class PackageWidget(QtGui.QWidget):
     def __init__(self, parent=None):
