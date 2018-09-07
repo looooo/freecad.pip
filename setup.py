@@ -1,9 +1,10 @@
 from setuptools import setup
 import sys, os
 
-sys.path.append(os.path.dirname(__file__))
-from freecad.pip import __version__
-sys.path.pop(-1)
+version_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 
+                            "freecad", "pip", "__version__.py")
+with open(version_path) as fp:
+    exec(fp.read())
 
 setup(name='freecad.pip',
       version=__version__,

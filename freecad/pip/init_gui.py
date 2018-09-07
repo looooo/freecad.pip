@@ -10,7 +10,7 @@ icon = QtGui.QIcon(os.path.join(__dir__, "PipTools.svg"))
 mw = Gui.getMainWindow()
 
 from freecad.pip.gui import PipWidget
-pip_widget = PipWidget()
+pip_widget = PipWidget(mw)
 App._pip_widget = pip_widget
 
 def onWorkbench():
