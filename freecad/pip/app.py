@@ -31,7 +31,7 @@ class _pip(object):
 
     def _c_option(self):
         """
-        internal fuction, returns the option to constraint packages
+        internal function, returns the option to constraint packages
         """
         return "-c{}".format(self.constraint_file)
 
