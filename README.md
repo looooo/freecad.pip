@@ -25,8 +25,8 @@ Type the following in to the FreecAD console:
 from freecad.pip.app import pip
 pip.list()                # print a list of all installed packages
 ```
-This will ouput a list of packages you can install via pip.  
-Use the following commands to install or uninstall said packages: 
+This will ouput a list of packages which are installed on your system.  
+Use the following commands to install or uninstall packages: 
 ```python
 pip.install("pkg_name")   # installs the package with pkg_name (if in freecad_modules.json)
 pip.uninstall("pkg_name") # uninstall the package.
